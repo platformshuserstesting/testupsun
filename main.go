@@ -75,8 +75,8 @@ func main() {
 	// 3. Fan-In: Merge worker results into a single channel
 	mergedResults := fanIn(worker1, worker2, worker3)
 
-	// 4. Consume resultss
-	for val := range mergedResultssss {
+	// 4. Consume results
+	for val := range mergedResults {
 		fmt.Printf("Result Received: %d\n", val)
 	}
 }
