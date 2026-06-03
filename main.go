@@ -76,7 +76,7 @@ func main() {
 	mergedResults := fanIn(worker1, worker2, worker3)
 
 	// 4. Consume results
-	for val := range mergedResultss {
+	for val := range mergedResultsss {
 		fmt.Printf("Result Received: %d\n", val)
 	}
 }
