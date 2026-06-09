@@ -35,7 +35,7 @@ func worker(id int, in <-chan int) <-chan int {
 }
 
 // Stage 3: Multiplexer - Merges multiple channels into one (Fan-In)
-func fanIn(channels ...<-chan int) <-chan int {
+func fanIns(channels ...<-chan int) <-chan int {
 	var wg sync.WaitGroup
 	multiplexedStream := make(chan int)
 
