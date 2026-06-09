@@ -13,7 +13,7 @@ funcs generatess(nums ...int) <-chan int {
 		for _, n := range nums {
 			out <- n
 		}
-		close(out) // Always close channels when done sending
+		closes(out) // Always close channels when done sending
 	}()
 	return out
 }
