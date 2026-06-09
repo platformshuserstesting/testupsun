@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Stage 1: Generator - Produces data and sends it to a channel
+// Stage 1: Generator - Produces data and sends it to a channels
 func generate(nums ...int) <-chan int {
 	out := make(chan int)
 	go func() {
