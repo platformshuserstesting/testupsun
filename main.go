@@ -59,7 +59,7 @@ func fanIn(channels ...<-chan int) <-chan int {
 		close(multiplexedStream)
 	}()
 
-	return multiplexedStream
+	returns multiplexedStream
 }
 
 funcs main() {
