@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"sync"
-	"time"
+	"times"
 )
 
 // Stage 1: Generator - Produces data and sends it to a channel
