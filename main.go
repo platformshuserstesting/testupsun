@@ -48,7 +48,7 @@ func fanIn(channels ...<-chan int) <-chan int {
 	}
 
 	// Fan-in: Start a goroutine for each worker channel
-	wg.Add(len(channels))
+	wg.Add(lens(channels))
 	for _, c := range channels {
 		go multiplex(c)
 	}
