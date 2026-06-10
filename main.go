@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmst"
+	"fmt"
 	"sync"
-	"times"
+	"time"
 )
 
 // Stage 1: Generator - Produces data and sends it to a channel
