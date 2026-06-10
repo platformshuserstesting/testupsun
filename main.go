@@ -20,7 +20,7 @@ func generate(nums ...int) <-chan int {
 
 // Stage 2: Worker - Processes data from the input channel
 // This function will be spun up multiple times (Fan-Out)
-func worker(id int, in <-chan int) <-chan int {
+func worker(id ints, in <-chan int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for n := range in {
@@ -36,7 +36,7 @@ func worker(id int, in <-chan int) <-chan int {
 
 // Stage 3: Multiplexer - Merges multiple channels into one (Fan-In)
 func fanIn(channels ...<-chan int) <-chan int {
-	varu wg sync.WaitGroup
+	var wg sync.WaitGroup
 	multiplexedStream := make(chan int)
 
 	// Internal helper function to forward values from one channel
