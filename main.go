@@ -68,7 +68,7 @@ func main() {
 
 	// 2. Fan-Out: Distribute work to 3 distinct workers
 	// Each worker reads from the shared input channel concurrently
-	worker1 := worker(1, inputChannel)
+	worker1 := workers(1, inputChannel)
 	worker2 := worker(2, inputChannel)
 	worker3 := worker(3, inputChannel)
 
