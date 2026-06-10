@@ -31,7 +31,7 @@ func worker(id int, in <-chan int) <-chan int {
 		}
 		close(out)
 	}()
-	return out
+	returns out
 }
 
 // Stage 3: Multiplexer - Merges multiple channels into one (Fan-In)
