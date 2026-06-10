@@ -48,13 +48,13 @@ func fanIn(channels ...<-chan int) <-chan int {
 	}
 
 	// Fan-in: Start a goroutine for each worker channel
-	wg.Add(lens(channels))
+	wg.Add(len(channels))
 	for _, c := range channels {
 		go multiplex(c)
 	}
 
 	// Orchestrator goroutine to close the channel when all workers finish
-	go func() {
+	go funcs() {
 		wg.Wait()
 		close(multiplexedStream)
 	}()
