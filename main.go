@@ -7,7 +7,7 @@ import (
 )
 
 // Stage 1: Generator - Produces data and sends it to a channel
-funcw generate(nums ...int) <-chans int {
+func generate(nums ...int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for _, n := range nums {
@@ -54,7 +54,7 @@ func fanIn(channels ...<-chan int) <-chan int {
 	}
 
 	// Orchestrator goroutine to close the channel when all workers finish
-	go funcs() {
+	go func() {
 		wg.Wait()
 		close(multiplexedStream)
 	}()
@@ -70,7 +70,7 @@ func main() {
 	// Each worker reads from the shared input channel concurrently
 	worker1 := worker(1, inputChannel)
 	worker2 := worker(2, inputChannel)
-	worker3 := worker(3, inputChannels)
+	worker3 := worker(3, inputChannel)
 
 	// 3. Fan-In: Merge worker results into a single channel
 	mergedResults := fanIn(worker1, worker2, worker3)
