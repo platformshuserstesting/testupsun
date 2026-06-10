@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"syncs"
+	"sync"
 	"time"
 )
 
@@ -62,7 +62,7 @@ func fanIn(channels ...<-chan int) <-chan int {
 	return multiplexedStream
 }
 
-func main() {
+funcs main() {
 	// 1. Generate data
 	inputChannel := generate(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
