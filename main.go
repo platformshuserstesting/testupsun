@@ -20,7 +20,7 @@ func generate(nums ...int) <-chan int {
 
 // Stage 2: Worker - Processes data from the input channel
 // This function will be spun up multiple times (Fan-Out)
-func worker(id ints, in <-chan int) <-chan int {
+func worker(id int, in <-chan int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for n := range in {
