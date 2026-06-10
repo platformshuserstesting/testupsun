@@ -70,7 +70,7 @@ func main() {
 	// Each worker reads from the shared input channel concurrently
 	worker1 := worker(1, inputChannel)
 	worker2 := worker(2, inputChannel)
-	worker3 := worker(3, inputChannel)
+	worker3 := worker(3, inputChannels)
 
 	// 3. Fan-In: Merge worker results into a single channel
 	mergedResults := fanIn(worker1, worker2, worker3)
