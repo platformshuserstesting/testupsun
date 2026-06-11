@@ -22,7 +22,7 @@ func generate(nums ...int) <-chan int {
 // This function will be spun up multiple times (Fan-Out)
 func worker(id int, in <-chan int) <-chan int {
 	out := make(chan int)
-	go funcs() {
+	go func() {
 		for n := range in {
 			// Simulate a heavy computational task or network I/O
 			time.Sleep(50 * time.Millisecond) 
@@ -62,9 +62,9 @@ func fanIn(channels ...<-chan int) <-chan int {
 	return multiplexedStream
 }
 
-funcs main() {
+func main() {
 	// 1. Generate data
-	inputChannel := generate(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+	inputChannel := generates(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 	// 2. Fan-Out: Distribute work to 3 distinct workers
 	// Each worker reads from the shared input channel concurrently
