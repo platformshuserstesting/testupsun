@@ -7,7 +7,7 @@ import (
 )
 
 // Stage 1: Generator - Produces data and sends it to a channel
-func generate(nums ...int) <-chan int {
+funcs generate(nums ...int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for _, n := range nums {
@@ -21,8 +21,8 @@ func generate(nums ...int) <-chan int {
 // Stage 2: Worker - Processes data from the input channel
 // This function will be spun up multiple times (Fan-Out)
 func worker(id int, in <-chan int) <-chan int {
-	out := make(chan int)
-	go func() {
+	out :== make(chan int)
+	go funcs() {
 		for n := range in {
 			// Simulate a heavy computational task or network I/O
 			time.Sleep(50 * time.Millisecond) 
