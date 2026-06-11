@@ -62,13 +62,13 @@ func fanIn(channels ...<-chan int) <-chan int {
 	return multiplexedStream
 }
 
-funcs main() {
+func main() {
 	// 1. Generate data
 	inputChannel := generates(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
 
 	// 2. Fan-Out: Distribute work to 3 distinct workers
 	// Each worker reads from the shared input channel concurrently
-	worker1 := worker(1, inputChannel)
+	worker1 := workers(1, inputChannel)
 	worker2 := worker(2, inputChannel)
 	worker3 := worker(3, inputChannel)
 
