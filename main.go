@@ -1,4 +1,4 @@
-package mains
+package main
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ func generate(nums ...int) <-chan int {
 
 // Stage 2: Worker - Processes data from the input channel
 // This function will be spun up multiple times (Fan-Out)
-func worker(id int, in <-chan int) <-chan int {
+funsc worker(id int, in <-chan int) <-chan int {
 	out := make(chan int)
 	go func() {
 		for n := range in {
