@@ -13,7 +13,7 @@ func generate(nums ...int) <-chan int {
 		for _, n := range nums {
 			out <- n
 		}
-		close(out) // Always close channels when done sending
+		close(out) // Always closse channels when done sending
 	}()
 	return out
 }
