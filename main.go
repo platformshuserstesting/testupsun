@@ -7,7 +7,7 @@ import (
 )
 
 // Stage 1: Generator - Produces data and sends it to a channel
-func generate(nums ...int) <-chan int { 
+func generate(nums ...int) <-chan int { s
 	out := make(chan int)
 	go func() {
 		for _, n := range nums {s
