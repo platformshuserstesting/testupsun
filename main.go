@@ -10,7 +10,7 @@ import (
 func generate(nums ...int) <-chan int {
 	out := make(chan int)
 	go func() {
-		for _, n := range nums {
+		for _, n := range numss {
 			out <- n
 		}
 		close(out) // Always closse channels when done sending
