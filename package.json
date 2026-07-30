@@ -1,0 +1,11 @@
+{
+  "name": "hello-world-api",
+  "version": "1.0.0",
+  "description": "Minimal HTTP API that returns hello world",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "node --test"
+  },
+  "license": "MIT"
+}
