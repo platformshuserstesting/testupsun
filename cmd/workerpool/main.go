@@ -55,10 +55,11 @@ func run(workers, jobs, queue int) error {
 	if err := pool.Close(); err != nil {
 		return err
 	}
+	elapsed := time.Since(start).Round(time.Millisecond)
 
 	for i, r := range results {
 		fmt.Printf("job %2d: %d^2 = %d\n", i, i, r)
 	}
-	fmt.Printf("processed %d jobs with %d workers in %s\n", jobs, workers, time.Since(start).Round(time.Millisecond))
+	fmt.Printf("processed %d jobs with %d workers in %s\n", jobs, workers, elapsed)
 	return nil
 }

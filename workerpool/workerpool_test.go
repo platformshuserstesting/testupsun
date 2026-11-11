@@ -136,6 +136,7 @@ func TestBoundedConcurrency(t *testing.T) {
 					break
 				}
 			}
+			time.Sleep(time.Millisecond) // let tasks overlap
 			atomic.AddInt32(&inFlight, -1)
 			return nil
 		}); err != nil {
@@ -235,7 +236,7 @@ func TestSubmitBackpressureContext(t *testing.T) {
 			name: "canceled",
 			makeCtx: func() (context.Context, context.CancelFunc) {
 				ctx, cancel := context.WithCancel(context.Background())
-				cancel()
+				time.AfterFunc(20*time.Millisecond, cancel)
 				return ctx, cancel
 			},
 			wantErr: context.Canceled,
@@ -315,10 +316,11 @@ func TestCloseDrainsQueuedTasks(t *testing.T) {
 	go func() { closed <- p.Close() }()
 
 	// Close must wait for the blocked task and the queue to drain.
+	waitFor(t, p.done, "Close to start")
 	select {
 	case err := <-closed:
 		t.Fatalf("Close returned early with %v while a task was still running", err)
-	default:
+	case <-time.After(50 * time.Millisecond):
 	}
 	close(release)
 	select {

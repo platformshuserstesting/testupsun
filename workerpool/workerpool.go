@@ -1,28 +1,5 @@
-// Package workerpool provides a fixed-size pool of worker goroutines that
-// execute tasks pulled from a bounded queue.
-//
-// Typical usage:
-//
-//	pool, err := workerpool.New(4, 16)
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	for i := 0; i < 100; i++ {
-//		if err := pool.Submit(ctx, func() error {
-//			// do work
-//			return nil
-//		}); err != nil {
-//			log.Println(err)
-//		}
-//	}
-//	if err := pool.Close(); err != nil {
-//		log.Println("some tasks failed:", err)
-//	}
-//
-// Submit blocks while the queue is full (backpressure) until there is room or
-// the supplied context is done. Close stops accepting new tasks, waits for all
-// queued tasks to finish and returns the errors reported by tasks, joined with
-// errors.Join. Panics inside tasks are recovered and reported as errors.
+// Package workerpool runs tasks on a fixed number of goroutines fed by a
+// bounded queue.
 package workerpool
 
 import (
@@ -63,9 +40,7 @@ type Pool struct {
 	closeErr  error
 }
 
-// New starts a pool with the given number of workers and a task queue that
-// buffers up to queueSize pending tasks. A queueSize of 0 means Submit hands
-// tasks directly to an idle worker.
+// New starts workers goroutines with a queue of queueSize pending tasks.
 func New(workers, queueSize int) (*Pool, error) {
 	if workers < 1 {
 		return nil, ErrInvalidWorkers
@@ -90,14 +65,8 @@ func (p *Pool) Workers() int {
 	return p.workers
 }
 
-// Submit queues t for execution. It blocks while the queue is full until
-// there is room or ctx is done, in which case ctx.Err() is returned and the
-// task is not run. If ctx is already done when Submit is called, the task is
-// never queued. It returns ErrPoolClosed once Close has been called. A Submit
-// that was waiting for queue space when Close started is released: it
-// returns ErrPoolClosed, unless queue space opened up at the same moment, in
-// which case the task is queued, runs before Close returns, and Submit
-// returns nil.
+// Submit queues t, blocking while the queue is full until there is room or
+// ctx is done. It returns ErrPoolClosed once Close has been called.
 func (p *Pool) Submit(ctx context.Context, t Task) error {
 	if t == nil {
 		return ErrNilTask
@@ -105,11 +74,7 @@ func (p *Pool) Submit(ctx context.Context, t Task) error {
 	if err := ctx.Err(); err != nil {
 		return err
 	}
-	// Holding the read lock across the send guarantees Close cannot close the
-	// channel while a send is in flight. Close first closes p.done, which
-	// releases any Submit blocked on a full queue, so Close's write lock is
-	// never held up by a waiting sender (even if tasks themselves call
-	// Submit).
+	// The read lock stops Close from closing p.tasks mid-send.
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	if p.closed {
@@ -125,13 +90,8 @@ func (p *Pool) Submit(ctx context.Context, t Task) error {
 	}
 }
 
-// Close stops accepting new tasks, waits for all queued and running tasks to
-// finish and returns the errors reported by tasks joined with errors.Join
-// (nil if none failed). It is safe to call Close more than once; later calls
-// return the same result.
-//
-// Close must not be called from inside a task: it waits for every worker to
-// finish, including the one running the calling task, and would block forever.
+// Close stops accepting tasks, waits for queued and running ones, and returns
+// their errors joined. It must not be called from inside a task.
 func (p *Pool) Close() error {
 	p.closeOnce.Do(func() {
 		close(p.done)
@@ -149,18 +109,13 @@ func (p *Pool) Close() error {
 	return p.closeErr
 }
 
-// errTaskGoexit is reported when a task ends its goroutine with
-// runtime.Goexit (for example t.FailNow called inside a task).
 var errTaskGoexit = errors.New("workerpool: task called runtime.Goexit")
 
 func (p *Pool) worker() {
 	finished := false
 	defer func() {
 		if !finished {
-			// Panics are recovered in run, so the only way to get here early
-			// is a task calling runtime.Goexit. Report it and start a
-			// replacement so the pool keeps its worker count. Add before Done
-			// keeps the WaitGroup above zero, so Close keeps waiting.
+			// A task called runtime.Goexit: replace this worker.
 			p.addErr(errTaskGoexit)
 			p.wg.Add(1)
 			go p.worker()
