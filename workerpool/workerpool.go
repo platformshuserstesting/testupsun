@@ -17,7 +17,8 @@ var (
 	ErrInvalidWorkers = errors.New("workerpool: workers must be at least 1")
 	// ErrInvalidQueueSize is returned by New when the queue size is negative.
 	ErrInvalidQueueSize = errors.New("workerpool: queue size must not be negative")
-	// ErrPoolClosed is returned by Submit after Close has been called.
+	// ErrPoolClosed is returned by Submit when the pool is closed or closing;
+	// see Submit for the cases around Close.
 	ErrPoolClosed = errors.New("workerpool: pool is closed")
 	// ErrNilTask is returned by Submit when the task is nil.
 	ErrNilTask = errors.New("workerpool: task is nil")
@@ -66,7 +67,11 @@ func (p *Pool) Workers() int {
 }
 
 // Submit queues t, blocking while the queue is full until there is room or
-// ctx is done. It returns ErrPoolClosed once Close has been called.
+// ctx is done. It returns ErrNilTask for a nil task and ctx.Err() if ctx is
+// already done. Otherwise, once Close has returned, it returns ErrPoolClosed.
+// While Close is in progress, Submit may return ErrPoolClosed or ctx.Err(),
+// or still queue its task (returning nil, and the task runs before Close
+// returns), whether or not the queue is full.
 func (p *Pool) Submit(ctx context.Context, t Task) error {
 	if t == nil {
 		return ErrNilTask
