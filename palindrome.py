@@ -4,7 +4,7 @@
 Provides a reusable :func:`is_palindrome` function and a small command line
 interface.
 
-Text is normalized before comparison: it is lowercased and every character
+Text is normalized before comparison: it is casefolded and every character
 that is not alphanumeric (letters, digits, including non-ASCII ones) is
 removed. As a consequence, an empty string -- or a string made only of
 punctuation such as ``"!!!"`` -- normalizes to ``""`` and is considered a
@@ -31,10 +31,10 @@ from typing import Optional, Sequence
 
 
 def normalize(text: str) -> str:
-    """Return ``text`` lowercased with all non-alphanumeric characters removed."""
+    """Return ``text`` casefolded with all non-alphanumeric characters removed."""
     if not isinstance(text, str):
         raise TypeError(f"expected a string, got {type(text).__name__}")
-    return "".join(ch for ch in text.lower() if ch.isalnum())
+    return "".join(ch for ch in text.casefold() if ch.isalnum())
 
 
 def is_palindrome(text: str) -> bool:
@@ -50,7 +50,9 @@ def is_palindrome(text: str) -> bool:
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Run the command line interface.
 
-    Returns ``0`` when the input is a palindrome and ``1`` when it is not.
+    Returns ``0`` when the input is a palindrome, ``1`` when it is not and
+    ``2`` when no input could be read (empty stdin or a blank line, Ctrl-D
+    or Ctrl-C).
     """
     parser = argparse.ArgumentParser(
         description="Check whether a string (or number) is a palindrome."
@@ -64,10 +66,16 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
     text = args.text
     if text is None:
-        if sys.stdin.isatty():
-            text = input("Enter text to check: ")
-        else:
-            text = sys.stdin.readline().rstrip("\n")
+        try:
+            if sys.stdin.isatty():
+                text = input("Enter text to check: ")
+            else:
+                text = sys.stdin.readline().rstrip("\r\n")
+            if not text:
+                raise EOFError
+        except (EOFError, KeyboardInterrupt):
+            print("error: no input given", file=sys.stderr)
+            return 2
 
     if is_palindrome(text):
         print(f'"{text}" is a palindrome.')
