@@ -23,9 +23,3 @@ from palindrome import is_palindrome
 
 is_palindrome("racecar")  # True
 ```
-
-Run the tests:
-
-```bash
-python -m unittest test_palindrome -v
-```
