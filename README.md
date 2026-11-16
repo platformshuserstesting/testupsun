@@ -33,13 +33,14 @@ Flags:
 
 | Flag       | Default | Description                         |
 |------------|---------|-------------------------------------|
-| `-workers` | `4`     | number of worker goroutines (>= 1)  |
+| `-workers` | `4`     | number of worker goroutines (1-1000)|
 | `-jobs`    | `20`    | number of jobs to generate          |
 | `-delay`   | `50ms`  | simulated work time per job         |
 
 Results are printed as they arrive, so their order changes between runs. A
 summary at the end shows the total, the sum of outputs, and how many jobs each
-worker handled.
+worker handled. If interrupted with Ctrl-C, the program prints the partial
+summary and exits with status 130.
 
 ## Test
 
