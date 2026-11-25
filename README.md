@@ -33,7 +33,7 @@ Flags:
 
 | Flag       | Default | Description                         |
 |------------|---------|-------------------------------------|
-| `-workers` | `4`     | number of worker goroutines (1-1000)|
+| `-workers` | `4`     | number of worker goroutines (1-100) |
 | `-jobs`    | `20`    | number of jobs to generate          |
 | `-delay`   | `50ms`  | simulated work time per job         |
 

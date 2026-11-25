@@ -16,7 +16,7 @@ import (
 
 // maxWorkers caps -workers so a mistyped value is rejected instead of
 // exhausting memory or overflowing.
-const maxWorkers = 1000
+const maxWorkers = 100
 
 func main() {
 	workers := flag.Int("workers", 4, "number of worker goroutines (fan-out)")
@@ -60,8 +60,6 @@ func main() {
 		sum += r.Output
 	}
 
-	// A run is interrupted only if results are missing; a signal that arrives
-	// after every result was received does not count.
 	interrupted := total < *jobs
 	if interrupted {
 		fmt.Println("interrupted")
