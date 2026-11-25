@@ -21,9 +21,9 @@ import (
 
 // Result is the outcome of processing one input.
 type Result struct {
-	WorkerID int // which worker handled the input
-	Input    int // the value read from the job channel
-	Output   int // the computed value (Input squared)
+	WorkerID int   // which worker handled the input
+	Input    int   // the value read from the job channel
+	Output   int64 // the computed value (Input squared)
 }
 
 // Generate is the producer stage. It sends each of nums on the returned
@@ -72,7 +72,7 @@ func Worker(ctx context.Context, id int, in <-chan int, delay time.Duration) <-c
 				}
 			}
 			select {
-			case out <- Result{WorkerID: id, Input: n, Output: n * n}:
+			case out <- Result{WorkerID: id, Input: n, Output: int64(n) * int64(n)}:
 			case <-ctx.Done():
 				return
 			}

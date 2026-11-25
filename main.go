@@ -19,6 +19,10 @@ import (
 // and the input slice stays small.
 const maxN = 1_000_000
 
+// maxWorkers bounds -workers so the demo cannot start enough goroutines to
+// exhaust memory.
+const maxWorkers = 10_000
+
 func main() {
 	workers := flag.Int("workers", 3, "number of worker goroutines (fan-out)")
 	n := flag.Int("n", 10, "process the numbers 1..n")
@@ -26,8 +30,8 @@ func main() {
 	timeout := flag.Duration("timeout", 0, "stop the pipeline after this long (0 = no timeout)")
 	flag.Parse()
 
-	if *workers < 1 {
-		fmt.Fprintln(os.Stderr, "error: -workers must be at least 1")
+	if *workers < 1 || *workers > maxWorkers {
+		fmt.Fprintf(os.Stderr, "error: -workers must be between 1 and %d\n", maxWorkers)
 		os.Exit(1)
 	}
 	if *n < 0 || *n > maxN {
@@ -58,7 +62,7 @@ func main() {
 	jobs := fanio.Generate(ctx, nums...)
 	results := fanio.Merge(ctx, fanio.FanOut(ctx, jobs, *workers, *delay)...)
 
-	count, total := 0, 0
+	count, total := 0, int64(0)
 	for r := range results {
 		fmt.Printf("worker %d: %d -> %d\n", r.WorkerID, r.Input, r.Output)
 		count++

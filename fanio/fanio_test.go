@@ -41,16 +41,17 @@ func TestEveryInputProcessedExactlyOnce(t *testing.T) {
 	if len(results) != len(nums) {
 		t.Fatalf("got %d results, want %d", len(results), len(nums))
 	}
-	outputs := make([]int, len(results))
+	outputs := make([]int64, len(results))
 	for i, r := range results {
-		if r.Output != r.Input*r.Input {
-			t.Errorf("worker %d: %d -> %d, want %d", r.WorkerID, r.Input, r.Output, r.Input*r.Input)
+		want := int64(r.Input) * int64(r.Input)
+		if r.Output != want {
+			t.Errorf("worker %d: %d -> %d, want %d", r.WorkerID, r.Input, r.Output, want)
 		}
 		outputs[i] = r.Output
 	}
-	sort.Ints(outputs)
+	sort.Slice(outputs, func(i, j int) bool { return outputs[i] < outputs[j] })
 	for i, n := range nums {
-		if outputs[i] != n*n {
+		if outputs[i] != int64(n)*int64(n) {
 			t.Fatalf("sorted outputs[%d] = %d, want %d", i, outputs[i], n*n)
 		}
 	}
@@ -75,8 +76,9 @@ func TestWorkIsSpreadAcrossWorkers(t *testing.T) {
 }
 
 func TestCancelClosesMergedChannel(t *testing.T) {
+	const workers = 3
 	ctx, cancel := context.WithCancel(context.Background())
-	merged := Merge(ctx, FanOut(ctx, Generate(ctx, seq(1000)...), 3, 10*time.Millisecond)...)
+	merged := Merge(ctx, FanOut(ctx, Generate(ctx, seq(1000)...), workers, 10*time.Millisecond)...)
 
 	// Read a single result, then cancel and stop reading promptly.
 	select {
@@ -86,9 +88,12 @@ func TestCancelClosesMergedChannel(t *testing.T) {
 	}
 	cancel()
 
+	// After cancel, each worker can still hand over at most the result it
+	// already finished, and each Merge forwarder at most the one it holds,
+	// so no more than 2 results per worker may arrive.
 	results := collect(t, merged)
-	if len(results) >= 999 {
-		t.Fatalf("expected cancellation to stop the pipeline early, got %d more results", len(results))
+	if max := 2 * workers; len(results) > max {
+		t.Fatalf("expected cancellation to stop the pipeline promptly, got %d more results (max %d)", len(results), max)
 	}
 }
 

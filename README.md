@@ -35,7 +35,7 @@ Flags:
 
 | Flag       | Default | Description                                   |
 |------------|---------|-----------------------------------------------|
-| `-workers` | `3`     | number of worker goroutines (fan-out)         |
+| `-workers` | `3`     | number of worker goroutines (at most 10000)   |
 | `-n`       | `10`    | process the numbers 1..n (at most 1000000)    |
 | `-delay`   | `0`     | simulated work per item, e.g. `10ms`          |
 | `-timeout` | `0`     | stop the pipeline after this long (0 = never) |
