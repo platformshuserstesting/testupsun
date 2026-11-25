@@ -1,16 +1,4 @@
-// Package fanio demonstrates the fan-out / fan-in concurrency pattern with
-// goroutines and channels.
-//
-// The pipeline has three stages:
-//
-//   - Generate: a single producer goroutine sends jobs on one channel.
-//   - Worker / FanOut: several worker goroutines all read from that same
-//     channel (fan-out), so the jobs are spread across them.
-//   - Merge: the workers' result channels are combined into a single
-//     channel (fan-in).
-//
-// Every stage watches ctx.Done(), so cancelling the context stops the whole
-// pipeline without leaking goroutines.
+// Package fanio implements a fan-out / fan-in pipeline with goroutines.
 package fanio
 
 import (
@@ -21,13 +9,12 @@ import (
 
 // Result is the outcome of processing one input.
 type Result struct {
-	WorkerID int   // which worker handled the input
-	Input    int   // the value read from the job channel
-	Output   int64 // the computed value (Input squared)
+	WorkerID int
+	Input    int
+	Output   int64
 }
 
-// Generate is the producer stage. It sends each of nums on the returned
-// channel and closes it when done or when ctx is cancelled.
+// Generate sends each of nums on the returned channel.
 func Generate(ctx context.Context, nums ...int) <-chan int {
 	out := make(chan int)
 	go func() {
@@ -43,10 +30,7 @@ func Generate(ctx context.Context, nums ...int) <-chan int {
 	return out
 }
 
-// Worker reads jobs from in, squares each one and sends a Result on the
-// returned channel. delay simulates work per item (zero means no delay).
-// Several workers reading from the same in channel is the fan-out.
-// The returned channel is closed when in is drained or ctx is cancelled.
+// Worker squares each job from in, waiting delay per item.
 func Worker(ctx context.Context, id int, in <-chan int, delay time.Duration) <-chan Result {
 	out := make(chan Result)
 	go func() {
@@ -81,8 +65,7 @@ func Worker(ctx context.Context, id int, in <-chan int, delay time.Duration) <-c
 	return out
 }
 
-// FanOut starts n workers (with IDs 1..n) that all read from in, and returns
-// their result channels.
+// FanOut starts n workers that share in.
 func FanOut(ctx context.Context, in <-chan int, n int, delay time.Duration) []<-chan Result {
 	chans := make([]<-chan Result, 0, n)
 	for i := 1; i <= n; i++ {
@@ -91,9 +74,7 @@ func FanOut(ctx context.Context, in <-chan int, n int, delay time.Duration) []<-
 	return chans
 }
 
-// Merge is the fan-in stage. It forwards values from every channel in chans
-// onto a single returned channel, which is closed once all inputs are
-// drained (or ctx is cancelled).
+// Merge combines chans into a single channel.
 func Merge(ctx context.Context, chans ...<-chan Result) <-chan Result {
 	out := make(chan Result)
 	var wg sync.WaitGroup
