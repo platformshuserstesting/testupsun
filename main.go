@@ -1,8 +1,3 @@
-// Command testupsun demonstrates the fan-out / fan-in pattern with goroutines.
-//
-// A producer sends the numbers 1..n on one channel, several workers read from
-// that channel concurrently (fan-out) and square each number, and their
-// results are merged back into a single channel (fan-in).
 package main
 
 import (
@@ -15,12 +10,8 @@ import (
 	"github.com/platformshuserstesting/testupsun/fanio"
 )
 
-// maxN bounds -n so the sum of squares (about n³/3) stays well inside int64
-// and the input slice stays small.
 const maxN = 1_000_000
 
-// maxWorkers bounds -workers so the demo cannot start enough goroutines to
-// exhaust memory.
 const maxWorkers = 10_000
 
 func main() {
@@ -70,7 +61,7 @@ func main() {
 	}
 
 	if errors.Is(ctx.Err(), context.DeadlineExceeded) && count < *n {
-		fmt.Printf("timeout after %s: received %d of %d results, partial sum %d\n", *timeout, count, *n, total)
+		fmt.Printf("timeout: %d of %d results, sum %d\n", count, *n, total)
 		return
 	}
 	fmt.Printf("fan-in received %d results, sum of squares = %d\n", count, total)
